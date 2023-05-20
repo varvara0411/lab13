@@ -411,21 +411,22 @@ public:
             return d; 
         } 
     } 
-     
+
     matrix algebr_addition() { //метод, возвращающий матрицу, состоящую из алгебраических дополнений к каждому элементу матрицы
         if (r != c) {
             std::cerr << "Matrix is not square." << std::endl; 
             return *this;
         }
         else {
+            matrix f(r, c, 0);
             matrix a = *this; 
             for (int i = 0; i < this->r; ++i) { 
-                for(int j = 0; j < this->r; j++) { 
+                for(int j = 0; j < this->r; ++j) { 
                     matrix q = a.matrwithout(i, j);
-                    this->mm[i][j] = pow(-1, (i + j)) * q.det(); 
+                    f.mm[i][j] = pow(-1, (i + j)) * q.det(); 
                 }  
             } 
-            return *this; 
+            return f; 
         }
     } 
     
@@ -452,9 +453,9 @@ public:
                 } 
                 else { 
                     T value = (T) 1 / (this->det()); 
-                    this->algebr_addition(); 
-                    this->transposition();
-                    return ((*this) * value); 
+                    auto matr = this->algebr_addition(); 
+                    matr.transposition();
+                    return (matr * value); 
                 } 
             }
         } 
