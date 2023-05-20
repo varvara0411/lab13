@@ -483,12 +483,19 @@ std::ostream& operator<<(std::ostream& out, const matrix<T>& mtr) //перегр
 }
 
 int main() {
-   auto my_mtrx = matrix<int>::one_matr(5);
+    auto my_mtrx = matrix<int>::one_matr(5);
     std::cout << my_mtrx;
     if (my_mtrx == 1) {
         std::cout << "they are equal" << std::endl;
     }
-    std::cout << my_mtrx * 2;
+    std::cout << "------------" << std::endl;
+    matrix<int> my_mtrx1(5, 5, 2);
+    auto pos = my_mtrx * 2;
+    std::cout << pos;
+    std::cout << "------------" << std::endl;
+    std::cout << pos + my_mtrx1;
+    std::cout << "------------" << std::endl;
+    std::cout << pos - my_mtrx1;
     std::cout << "------------" << std::endl;
     my_mtrx.readtofile_full("output.txt");
     my_mtrx.readtofile_value("output1.txt", 2, 2);
