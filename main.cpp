@@ -11,7 +11,7 @@ private:
     int r; 
     int c; 
 public:
-  matrix() { //контсруктор по умолчанию
+  matrix() { //конструктор по умолчанию
     r = 0;
     c = 0;
     mm = nullptr; 
@@ -41,7 +41,7 @@ public:
             std::cin >> mm[i][j];
   }
 
-  matrix (const std::string file) { //конструктор считывания матрицы из заданного файла
+  matrix(const std::string file) { //конструктор считывания матрицы из заданного файла
       std::ifstream f;
       f.open(file);
       if (f.is_open()) {
@@ -104,44 +104,45 @@ public:
         delete[] mm;
     }
   }
-  
-
-  matrix& operator+(const matrix& m1) { //перегрузка оператора сложения матриц
+    matrix operator+(const matrix& m1) { //перегрузка оператора сложения матриц
         if ((r != m1.r)||(c != m1.c)) {
             std::cerr << "The operation cannot be performed due to different matrix sizes" << std::endl;
             return *this;
         }
         else {
+            matrix b = matrix(r, c, 0);
             for (int i = 0; i < r; i++) {
                 for (int j = 0; j < c; j++) {
-                    mm[i][j] = mm[i][j] + m1.mm[i][j];
+                    b.mm[i][j] = mm[i][j] + m1.mm[i][j];
                 }
             }
-            return *this;
+            return b;
         }
   }
 
-    matrix& operator-(const matrix& m2) { //перегрузка оператора вычитания матриц
+    matrix operator-(const matrix& m2) { //перегрузка оператора вычитания матриц
         if ((r != m2.r)||(c != m2.c)) {
             std::cerr << "The operation cannot be performed due to different matrix sizes" << std::endl;
             return *this;
         }
         else {
+            matrix b = matrix(r, c, 0);
             for (int i = 0; i < r; i++) {
                 for (int j = 0; j < c; j++) {
-                    mm[i][j] = mm[i][j] - m2.mm[i][j];
+                    b.mm[i][j] = mm[i][j] - m2.mm[i][j];
                 }
             }
-            return *this;
+            return b;
         }
     }
-    matrix& operator*(T num) { //перегрузка оператора умножения матрицы на скаляр
+    matrix operator*(T num) { //перегрузка оператора умножения матрицы на скаляр
+        matrix b = matrix(r, c, 0);
         for (int i = 0; i < r; i++) {
             for (int j = 0; j < c; j++) {
-                mm[i][j] = (T) mm[i][j] * num;
+                b.mm[i][j] = (T) mm[i][j] * num;
             }
         }
-        return *this;
+        return b;
     }
     matrix operator*(const matrix& a) { //перегрузка оператора умножения матриц друг на друга
         if (c != a.r ) {
@@ -149,7 +150,7 @@ public:
             return *this;
         }
         else {
-            matrix b = matrix (r, a.c, 0);
+            matrix b = matrix(r, a.c, 0);
             for (int i = 0; i < r; ++ i)
                 for (int j = 0; j < a.c; ++ j)
                     for (int k = 0; k < c; ++ k)
@@ -439,7 +440,7 @@ public:
     } 
     
     
-    matrix& operator! () { //перегрузка оператора логического отрицания для вычисления обратной матрицы
+    matrix operator! () { //перегрузка оператора логического отрицания для вычисления обратной матрицы
         try { 
             if (r != c) {
                 throw std::logic_error("Matrix is not square. Inverse matrix does not exist."); 
@@ -487,6 +488,7 @@ int main() {
     if (my_mtrx == 1) {
         std::cout << "they are equal" << std::endl;
     }
+    std::cout << my_mtrx * 2;
     std::cout << "------------" << std::endl;
     my_mtrx.readtofile_full("output.txt");
     my_mtrx.readtofile_value("output1.txt", 2, 2);
