@@ -8,8 +8,8 @@ template <class T>
 class matrix {
 private:
     T** mm; 
-    int r; 
-    int c; 
+    size_t r; 
+    size_t c; 
 public:
   matrix() { //конструктор по умолчанию
     r = 0;
@@ -17,41 +17,41 @@ public:
     mm = nullptr; 
   }
   
-  matrix(int r, int c, T val) //конструктор, создающий матрицу, элементы которой равны заданному значению
+  matrix(size_t r, size_t c, T val) //конструктор, создающий матрицу, элементы которой равны заданному значению
   {
     this->r = r;
     this->c = c;
     mm = new T*[r];
-    for (int i = 0; i < r; i++)
+    for (size_t i = 0; i < r; i++)
       mm[i] = new T[c];
-    for (int i = 0; i < r; i++)
-        for (int j = 0; j < c; j++)
+    for (size_t i = 0; i < r; i++)
+        for (size_t j = 0; j < c; j++)
             mm[i][j] = val;
   }
 
-  matrix(int r, int c) //конструктор для заполнения матрицы с консоли
+  matrix(size_t r, size_t c) //конструктор для заполнения матрицы с консоли
   {
     this->r = r;
     this->c = c;
     mm = new T*[r]; 
-    for (int i = 0; i < r; i++)
+    for (size_t i = 0; i < r; i++)
       mm[i] = new T[c];
-    for (int i = 0; i < r; i++)
-        for (int j = 0; j < c; j++)
+    for (size_t i = 0; i < r; i++)
+        for (size_t j = 0; j < c; j++)
             std::cin >> mm[i][j];
   }
 
-  matrix(const std::string file) { //конструктор считывания матрицы из заданного файла
+  matrix(const std::string& file) { //конструктор считывания матрицы из заданного файла
       std::ifstream f;
       f.open(file);
       if (f.is_open()) {
           f >> r;
           f >> c;
           mm = new T*[r];
-          for (int i = 0; i < r; i++)
+          for (size_t i = 0; i < r; i++)
             mm[i] = new T[c];
-          for (int i = 0; i < r; i++) {
-              for (int j = 0; j < c; j++) {
+          for (size_t i = 0; i < r; i++) {
+              for (size_t j = 0; j < c; j++) {
                   f >> mm[i][j];
               }
 	      }
@@ -65,54 +65,59 @@ public:
     r = M1.r;
     c = M1.c;
     mm = (T**) new T*[r];
-    for (int i = 0; i < r; i++)
+    for (size_t i = 0; i < r; i++)
       mm[i] = (T*) new T[c];
-    for (int i = 0; i < r; i++)
-      for (int j = 0; j < c; j++)
+    for (size_t i = 0; i < r; i++)
+      for (size_t j = 0; j < c; j++)
         mm[i][j] = M1.mm[i][j];
   }
 
   matrix operator=(const matrix& M2) //перегрузка оператора присваивания
   {
-    if (c > 0)
-    {
-      for (int i = 0; i < r; i++)
-        delete[] mm[i];
+    if (*this == M2) { //проверка на самоприсваивание
+        return *this;
     }
-    if (r > 0)
-    {
-      delete[] mm;
+    else {
+        if (c > 0)
+        {
+            for (size_t i = 0; i < r; i++)
+                delete[] mm[i];
+        }
+        if (r > 0)
+        {
+        delete[] mm;
+        }
+        r = M2.r;
+        c = M2.c;
+        mm = (T**) new T*[r]; 
+        for (size_t i = 0; i < r; i++)
+            mm[i] = (T*) new T[c];
+        for (size_t i = 0; i < r; i++)
+            for (size_t j = 0; j < c; j++)
+                mm[i][j] = M2.mm[i][j];
+        return *this;
     }
-    r = M2.r;
-    c = M2.c;
-    mm = (T**) new T*[r]; 
-    for (int i = 0; i < r; i++)
-      mm[i] = (T*) new T[c];
-    for (int i = 0; i < r; i++)
-      for (int j = 0; j < c; j++)
-        mm[i][j] = M2.mm[i][j];
-    return *this;
   }
 
   ~matrix() { //деструктор
     if (c > 0)
     {
-      for (int i = 0; i < r; i++)
+      for (size_t i = 0; i < r; i++)
         delete[] mm[i];
     }
     if (r > 0) {
         delete[] mm;
     }
   }
-    matrix operator+(const matrix& m1) { //перегрузка оператора сложения матриц
+    matrix operator+(const matrix& m1) const { //перегрузка оператора сложения матриц
         if ((r != m1.r)||(c != m1.c)) {
             std::cerr << "The operation cannot be performed due to different matrix sizes" << std::endl;
             return *this;
         }
         else {
             matrix b = matrix(r, c, 0);
-            for (int i = 0; i < r; i++) {
-                for (int j = 0; j < c; j++) {
+            for (size_t i = 0; i < r; i++) {
+                for (size_t j = 0; j < c; j++) {
                     b.mm[i][j] = mm[i][j] + m1.mm[i][j];
                 }
             }
@@ -120,51 +125,51 @@ public:
         }
   }
 
-    matrix operator-(const matrix& m2) { //перегрузка оператора вычитания матриц
+    matrix operator-(const matrix& m2) const { //перегрузка оператора вычитания матриц
         if ((r != m2.r)||(c != m2.c)) {
             std::cerr << "The operation cannot be performed due to different matrix sizes" << std::endl;
             return *this;
         }
         else {
             matrix b = matrix(r, c, 0);
-            for (int i = 0; i < r; i++) {
-                for (int j = 0; j < c; j++) {
+            for (size_t i = 0; i < r; i++) {
+                for (size_t j = 0; j < c; j++) {
                     b.mm[i][j] = mm[i][j] - m2.mm[i][j];
                 }
             }
             return b;
         }
     }
-    matrix operator*(T num) { //перегрузка оператора умножения матрицы на скаляр
+    matrix operator*(T num) const { //перегрузка оператора умножения матрицы на скаляр
         matrix b = matrix(r, c, 0);
-        for (int i = 0; i < r; i++) {
-            for (int j = 0; j < c; j++) {
+        for (size_t i = 0; i < r; i++) {
+            for (size_t j = 0; j < c; j++) {
                 b.mm[i][j] = (T) mm[i][j] * num;
             }
         }
         return b;
     }
-    matrix operator*(const matrix& a) { //перегрузка оператора умножения матриц друг на друга
+    matrix operator*(const matrix& a) const{ //перегрузка оператора умножения матриц друг на друга
         if (c != a.r ) {
             std::cerr << "It is impossible to perform the operation due to the inequality of the number of columns of the first matrix and the number of rows of the second matrix" << std::endl;
             return *this;
         }
         else {
             matrix b = matrix(r, a.c, 0);
-            for (int i = 0; i < r; ++ i)
-                for (int j = 0; j < a.c; ++ j)
-                    for (int k = 0; k < c; ++ k)
+            for (size_t i = 0; i < r; ++ i)
+                for (size_t j = 0; j < a.c; ++ j)
+                    for (size_t k = 0; k < c; ++ k)
                         b.mm[i][j] += mm[i][k] * a.mm[k][j];
             return b;
         }
     }
     
-    bool operator==(const matrix& m3) { //перегрузка оператора проверки матриц на равенство
+    bool operator==(const matrix& m3) const { //перегрузка оператора проверки матриц на равенство
         if ((r != m3.r) || (c != m3.c)) {
             return false;
         }
-        for (int i = 0; i < r; i++) {
-            for (int j = 0; j < c; j++) {
+        for (size_t i = 0; i < r; i++) {
+            for (size_t j = 0; j < c; j++) {
                 if (mm[i][j] != m3.mm[i][j]) {
                     return false;
                 }
@@ -173,12 +178,12 @@ public:
         return true;
     }
     
-    bool operator!=(const matrix& m4) { //перегрузка оператора проверки матриц на неравенство
+    bool operator!=(const matrix& m4) const { //перегрузка оператора проверки матриц на неравенство
         if ((r != m4.r)||(c != m4.c)) {
             return true;
         }
-        for (int i = 0; i < r; i++) {
-            for (int j = 0; j < c; j++) {
+        for (size_t i = 0; i < r; i++) {
+            for (size_t j = 0; j < c; j++) {
                 if (mm[i][j] != m4.mm[i][j]) {
                     return true;
                 }
@@ -186,19 +191,19 @@ public:
         }
         return false;
     }
-    static matrix zero_matr(int r1, int c1) { //статический метод создания нулевой матрицы заданных размеров
+    static matrix zero_matr(size_t r1, size_t c1) { //статический метод создания нулевой матрицы заданных размеров
         matrix b(r1, c1, 0);
         return b;
     }
-    static matrix one_matr(int size) { //статический метод создания единичной матрицы заданного размера
+    static matrix one_matr(size_t size) { //статический метод создания единичной матрицы заданного размера
         matrix a(size, size, 0);
 
-        for (int i = 0; i < size; i++)
+        for (size_t i = 0; i < size; i++)
             a.mm[i][i] = 1;
 
         return a;
     }
-    bool operator==(int val) { //перегрузка оператора проверки матрицы на равенство 0 или 1
+    bool operator==(int val) const { //перегрузка оператора проверки матрицы на равенство 0 или 1
         if (val == 0) {
             matrix q = matrix::zero_matr(r, c);
             if (*this == q) {
@@ -223,7 +228,7 @@ public:
         }
     }
     
-    bool operator!=(int val) { //перегрузка оператора проверки матрицы на неравенство 0 или 1
+    bool operator!=(int val) const { //перегрузка оператора проверки матрицы на неравенство 0 или 1
         if (val == 0) {
             matrix q = matrix::zero_matr(r, c);
             if (*this == q) {
@@ -248,14 +253,14 @@ public:
         }
     }
 
-    void readtofile_full(const std::string name) { //метод для записи в заданный файл размеров матрицы и самой матрицы
+    void readtofile_full(const std::string& name) const { //метод для записи в заданный файл размеров матрицы и самой матрицы
 	    std::ofstream par;
 	    par.open(name);
 	    if (par.is_open()) {
 	        par << this->r << ' ' << this->c;
 	        par << std::endl;
-	        for (int i = 0; i < this->r; i++) {
-                for (int j = 0; j < this->c; j++) {
+	        for (size_t i = 0; i < this->r; i++) {
+                for (size_t j = 0; j < this->c; j++) {
                     par << this->mm[i][j] << '\t';
                 }
                 par << std::endl;
@@ -264,7 +269,7 @@ public:
 	    else { std::cout << "No open" << std::endl; }
 	    par.close();
     }
-    void readtofile_value(const std::string name, int i, int j) { //метод для записи в заданный файл элемента из заданных строки и столбца
+    void readtofile_value(const std::string& name, size_t i, size_t j) const { //метод для записи в заданный файл элемента из заданных строки и столбца
 	    std::ofstream par;
 	    par.open(name);
 	    if (par.is_open()) {
@@ -275,38 +280,38 @@ public:
 	    else { std::cout << "No open" << std::endl; }
 	    par.close();
     }
-    void readtofile_row(const std::string name, int i) { //метод для записи в заданный файл элементов заданной строки
+    void readtofile_row(const std::string& name, size_t i) const { //метод для записи в заданный файл элементов заданной строки
 	    std::ofstream par;
 	    par.open(name);
 	    if (par.is_open()) {
 	        par << i;
 	        par << std::endl;
-            for (int j = 0; j < this->c; j++) {
+            for (size_t j = 0; j < this->c; j++) {
                 par << this->mm[i - 1][j] << '\t';
             }
 	    }
 	    else { std::cout << "No open" << std::endl; }
 	    par.close();
     }
-    void readtofile_col(const std::string name, int j) { //метод для записи в заданный файл элементов заданного столбца
+    void readtofile_col(const std::string& name, size_t j) const { //метод для записи в заданный файл элементов заданного столбца
 	    std::ofstream par;
 	    par.open(name);
 	    if (par.is_open()) {
 	        par << j;
 	        par << std::endl;
-            for (int i = 0; i < this->r; i++) {
+            for (size_t i = 0; i < this->r; i++) {
                 par << this->mm[i][j - 1] << std::endl;
             }
 	    }
 	    else { std::cout << "No open" << std::endl; }
 	    par.close();
     }
-    void readfromfile_full(const std::string name) { //метод для считывания матрицы из заданного файла
+    void readfromfile_full(const std::string& name) { //метод для считывания матрицы из заданного файла
         std::ifstream var;
         var.open(name);
         if (var.is_open()) {
-            for (int i = 0; i < this->r; i++) {
-                for (int j = 0; j < this->c; j++) {
+            for (size_t i = 0; i < this->r; i++) {
+                for (size_t j = 0; j < this->c; j++) {
                     var >> this->mm[i][j];
                 }
 	        }
@@ -314,13 +319,13 @@ public:
         else { std::cerr << "File can not be opened" << std::endl; }
 	    var.close();
 	}
-    void readfromfile_value(const std::string name, int k, int t) { //метод для считывания элемента из заданных строки и столбца матрицы из заданного файла
+    void readfromfile_value(const std::string& name, size_t k, size_t t) { //метод для считывания элемента из заданных строки и столбца матрицы из заданного файла
         std::ifstream var;
         var.open(name);
         T num;
         if (var.is_open()) {
-            for (int i = 0; i < this->r; ++i) {
-                for (int j = 0; j < this->c; ++j) {
+            for (size_t i = 0; i < this->r; ++i) {
+                for (size_t j = 0; j < this->c; ++j) {
                     var >> num;
                     if ((i == (k - 1)) && (j == (t - 1))) {
                         this->mm[i][j] = num;
@@ -332,13 +337,13 @@ public:
         else { std::cerr << "File can not be opened" << std::endl; }
 	    var.close();
 	}
-    void readfromfile_row(const std::string name, int p) { //метод для считывания элементов заданной строки матрицы из заданного файла
+    void readfromfile_row(const std::string& name, size_t p) { //метод для считывания элементов заданной строки матрицы из заданного файла
         std::ifstream var;
         var.open(name);
         T num;
         if (var.is_open()) {
-            for (int i = 0; i < this->r; ++i) {
-                for (int j = 0; j < this->c; ++j) {
+            for (size_t i = 0; i < this->r; ++i) {
+                for (size_t j = 0; j < this->c; ++j) {
                     var >> num;
                     if (i == (p - 1)) {
                         this->mm[i][j] = num;
@@ -349,13 +354,13 @@ public:
         else { std::cerr << "File can not be opened" << std::endl; }
 	    var.close();
 	}
-    void readfromfile_col(const std::string name, int p) { //метод для считывания элементов заданного столбца матрицы из заданного файла
+    void readfromfile_col(const std::string& name, size_t p) { //метод для считывания элементов заданного столбца матрицы из заданного файла
         std::ifstream var;
         var.open(name);
         T num;
         if (var.is_open()) {
-            for (int i = 0; i < this->r; ++i) {
-                for (int j = 0; j < this->c; ++j) {
+            for (size_t i = 0; i < this->r; ++i) {
+                for (size_t j = 0; j < this->c; ++j) {
                     var >> num;
                     if (j == (p - 1)) {
                         this->mm[i][j] = num;
@@ -367,16 +372,16 @@ public:
 	    var.close();
 	}
 
-    matrix matrwithout(int row, int col) { //метод, возвращающий матрицу с удалёнными заданными строкой и столбцом
-        int r1 = 0;  
-        int c1 = 0;  
+    matrix matrwithout(size_t row, size_t col) const { //метод, возвращающий матрицу с удалёнными заданными строкой и столбцом
+        size_t r1 = 0;  
+        size_t c1 = 0;  
         matrix h(this->r - 1, this->c - 1, 0); 
-        for(int i = 0; i < this->r - 1; i++) { 
+        for(size_t i = 0; i < this->r - 1; i++) { 
             if(i == row) { 
                 r1 = 1;  
             } 
             c1 = 0;  
-            for(int j = 0; j < this->r - 1; j++) { 
+            for(size_t j = 0; j < this->r - 1; j++) { 
                 if(j == col) { 
                     c1 = 1;  
                 } 
@@ -387,7 +392,7 @@ public:
     } 
      
     
-    T det() { //вычисление определителя матрицы
+    T det() const { //вычисление определителя матрицы
         if (r != c) {
             std::cerr << "Matrix is not square." << std::endl; 
             return 0;
@@ -402,7 +407,7 @@ public:
                 return this->mm[0][0] * this->mm[1][1] - this->mm[0][1] * this->mm[1][0]; 
             } 
             else { 
-                for(int j = 0; j < this->r; j++) { 
+                for(size_t j = 0; j < this->r; j++) { 
                     matrix q = this->matrwithout(0, j); 
                     d = d + (degree * this->mm[0][j] * q.det()); 
                     degree = -1 * degree; 
@@ -412,7 +417,7 @@ public:
         } 
     } 
 
-    matrix algebr_addition() { //метод, возвращающий матрицу, состоящую из алгебраических дополнений к каждому элементу матрицы
+    matrix algebr_addition() const { //метод, возвращающий матрицу, состоящую из алгебраических дополнений к каждому элементу матрицы
         if (r != c) {
             std::cerr << "Matrix is not square." << std::endl; 
             return *this;
@@ -420,8 +425,8 @@ public:
         else {
             matrix f(r, c, 0);
             matrix a = *this; 
-            for (int i = 0; i < this->r; ++i) { 
-                for(int j = 0; j < this->r; ++j) { 
+            for (size_t i = 0; i < this->r; ++i) { 
+                for(size_t j = 0; j < this->r; ++j) { 
                     matrix q = a.matrwithout(i, j);
                     f.mm[i][j] = pow(-1, (i + j)) * q.det(); 
                 }  
@@ -430,18 +435,16 @@ public:
         }
     } 
     
-    matrix transposition() { //метод, возвращающий транспонированную матрицу
-        matrix a = *this;
-        *this = matrix(c, r, 0);
-        for (int i = 0; i < a.c; i++) 
-            for (int j = 0; j < a.r; j++) { 
-                mm[i][j] = a.mm[j][i]; 
+    matrix transposition() const { //метод, возвращающий транспонированную матрицу
+        matrix b = matrix(c, r, 0);
+        for (size_t i = 0; i < c; i++) 
+            for (size_t j = 0; j < r; j++) { 
+                b.mm[i][j] = mm[j][i]; 
             }
-        return *this; 
+        return b; 
     } 
     
-    
-    matrix operator! () { //перегрузка оператора логического отрицания для вычисления обратной матрицы
+    matrix operator! ()  const { //перегрузка оператора логического отрицания для вычисления обратной матрицы
         try { 
             if (r != c) {
                 throw std::logic_error("Matrix is not square. Inverse matrix does not exist."); 
@@ -452,10 +455,10 @@ public:
                     throw std::logic_error("The determinant is zero. Inverse matrix does not exist."); 
                 } 
                 else { 
-                    T value = (T) 1 / (this->det()); 
+                    T value = (T) 1 / (determ); 
                     auto matr = this->algebr_addition(); 
-                    matr.transposition();
-                    return (matr * value); 
+                    auto matr1 = matr.transposition();
+                    return (matr1 * value); 
                 } 
             }
         } 
@@ -473,9 +476,9 @@ public:
 template<class T>
 std::ostream& operator<<(std::ostream& out, const matrix<T>& mtr) //перегрузка оператора вывода
 {
-    for (int i = 0; i < mtr.r; i++)
+    for (size_t i = 0; i < mtr.r; i++)
     {
-        for (int j = 0; j < mtr.c; j++)
+        for (size_t j = 0; j < mtr.c; j++)
             out << mtr.mm[i][j] << '\t';
         out << std::endl;
     }
